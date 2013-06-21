@@ -1,0 +1,363 @@
+%{
+	#include "hw4.h"
+	#include <iostream>
+	#include <stdlib.h>
+	#include <string>
+	#include "symbolTable.h"
+	#include "output.hpp"
+
+	#define YYERROR_VERBOSE 1 
+	#define YYDEBUG 1 
+
+	using namespace std;
+	extern int yylex();
+	extern int yylineno; 
+	int yyerror(char * message);
+	typedef enum { OP_AND, OP_OR } opType;
+	SymbolTable sym;
+
+	enum Arith {
+	PLUS,MINUS,MULT,DIV};
+
+	int whiles = 0;
+	bool decScope = false;
+
+	void typeMis(int line);
+	bool isInt(Type t);
+	bool isTime(Type t);
+
+	void errorMismatch();
+	void errorBreak();
+	void errorSyn();
+	void errorLex();
+	void errorUndef(string name);
+	void errorDef(string name);
+
+
+	void assertType(Type type, Type expected);
+	void assertType(Type type, Type type2, Type expected);
+	void assertTime(Type type);
+	void assertAssignable(Type type, Type secondType);
+	void assertComparable(Type type, Type secondType);
+	Type calculateMultiply(Type type, Type secondType);
+	Type calculateDiv(Type type, Type secondType);
+	void doIO(string name);
+	void addVariable(string name, Type type);
+	string addTempVar(Type type, string val);
+	Type getType(string name);
+	string convertInt(int number);
+
+	void emitArith(YYSTYPE first, Arith op, YYSTYPE second);
+	void emitOp(YYSTYPE first, string op, YYSTYPE second);
+%}
+
+%token ';' INPUT BREAK CASE SWITCH PRINT IF WHILE ERROR
+%token IDEN STR NUM SEC MIN HR D W BOOLEAN_VALUE BOOLEAN INTEGER
+%right '='
+%left OR
+%left AND
+%left EQUALS NEQ
+%left GE LE '<' '>'
+%left '+' '-'
+%left '*' '/'
+%nonassoc NOT
+%left '(' ')' '{' '}'
+%nonassoc ELSE 
+
+
+
+%%
+
+P			: {sym.startScope();} Statments {sym.endScope();}
+			;
+
+Statments	: Statments Statment
+			| Statment
+			;
+
+Statment 	: '{' {sym.startScope();decScope=false;} Statments '}' {sym.endScope();}
+			| Type IDEN ';'               {addVariable($2.text, $1.type);}
+			| Type IDEN '=' Exp ';'       {assertAssignable($1.type,$4.type); addVariable($2.text, $1.type);}
+			| IDEN '=' Exp ';'       {assertAssignable(getType($1.text),$3.type);}
+			| PRINT IDEN ';' 				{doIO($2.text);}
+			| PRINT STR ';' 			
+			| INPUT IDEN ';'				{doIO($2.text);}
+			| IF '(' Exp ')' DecStatment	{assertType($3.type, BOOL);}
+			| IF '(' Exp ')' DecStatment ELSE DecStatment {assertType($3.type, BOOL);}
+			| WHILE '(' Exp ')' {++whiles;} DecStatment {assertType($3.type, BOOL); --whiles;}
+			| BREAK ';' 		{if (whiles == 0) errorBreak(); }
+			| SWITCH '(' Exp ')' '{' CasesList '}' {assertTime($3.type);}
+			| ';' 					{errorSyn();}
+			| ERROR 		{errorLex(); }
+			;
+
+DecStatment	: { decScope=true;} Statment { decScope=false;}
+
+CasesList	: CaseStat CasesList
+			| CaseStat
+			;
+
+CaseStat	: CASE NUM TimeUnit ':' DecStatment BREAK ';'
+			;
+
+TimeUnit	: SEC 		{$$.type = SECOND;}
+			| MIN 		{$$.type = MINUTE;}
+			| HR 		{$$.type = HOUR;}
+			| D 		{$$.type = DAY;}
+			| W 		{$$.type = WEEK;}
+			;
+
+Type 		: TimeUnit 		{$$.type = $1.type;}
+			| INTEGER 		{$$.type = INT;}
+			| BOOLEAN 			{$$.type = BOOL;}
+			;
+
+Exp			: '(' Exp ')' 	{$$ = $2}
+			| Exp '+' Exp 	{assertComparable($1.type, $3.type); $$.type = $1.type; emitArith($1,PLUS,$3);}
+			| Exp '-' Exp 	{assertComparable($1.type, $3.type); $$.type = $1.type; emitArith($1,MINUS,$3);}
+			| Exp '*' Exp 	{$$.type = calculateMultiply($1.type, $3.type); emitArith($1,MULT,$3);}
+			| Exp '/' Exp   {$$.type = calculateDiv($1.type, $3.type); emitArith($1,DIV,$3);}
+			| IDEN 			 {$$.type = getType($1.text);}
+			| NUM			 {$$.type = INT; $$.name = addTempVar(INT, $1.text);}
+			| NUM TimeUnit	 {$$.type = $2.type; $$.name = addTempVar($2.type, $1.text);}
+			| BOOLEAN_VALUE  {$$.type = BOOL; $$.name = addTempVar(BOOL, $1.text);}
+			| NOT Exp 		 {assertType($2.type, BOOL); $$ = $2;}
+			| Exp OR Exp     {assertType($1.type, $3.type, BOOL); $$.type = BOOL;}
+			| Exp AND Exp    {assertType($1.type, $3.type, BOOL); $$.type = BOOL;}
+			| Exp '<' Exp 	 {assertComparable($1.type, $3.type); $$.type = BOOL;}
+			| Exp '>' Exp    {assertComparable($1.type, $3.type); $$.type = BOOL;}
+			| Exp LE Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
+			| Exp GE Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
+			| Exp EQUALS Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
+			| Exp NEQ Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
+			;
+
+
+
+%%
+
+main() { 
+	yydebug = 0; 
+	 yyparse(); 
+}
+
+int yyerror(char * s) { 
+ 	output::errorSyn(yylineno);
+ 	exit(1); 
+ 	return 0; 
+} 
+
+void typeCheck(Type t1, Type t2){
+	if (t1!=t2){
+	   output::errorMismatch(yylineno);
+	   exit(1);
+	}
+
+}
+
+bool isInt(Type t){
+	return t==INT;
+}
+
+bool isTime(Type t){
+	switch (t){
+		case(MINUTE):
+		case(SECOND):
+		case(HOUR):
+		case(DAY):
+		case(WEEK): return true;
+	}
+	return false;
+}
+
+void assertTime(Type type){
+	if (!isTime(type)) errorMismatch();
+}
+
+void assertType(Type type, Type expected){
+	if (type != expected) errorMismatch();
+}
+
+void assertType(Type type, Type type2, Type expected){
+	assertType(type, expected);
+	assertType(type2, expected);
+}
+
+
+void assertAssignable(Type type, Type secondType){
+	if (type == secondType) return;
+	assertComparable(type,secondType);
+}
+
+void assertComparable(Type type, Type secondType){
+	if (isInt(type)){
+		if(!isInt(secondType)) errorMismatch();
+		return;
+	}
+	if (isTime(type)){
+		if (!isTime(secondType)) errorMismatch();
+		return;
+	}
+	errorMismatch(); //TODO is this really a mismatch?
+}
+
+Type calculateMultiply(Type type, Type secondType){
+	if (isTime(type)){
+		if (isInt(secondType))
+			return type;
+		errorMismatch();
+	}
+	if (isInt(type)){
+		if (isTime(secondType))
+			return secondType;
+		if (isInt(secondType))
+			return INT;
+	}
+	errorMismatch();
+	return INT;
+}
+
+Type calculateDiv(Type type, Type secondType){
+	if (isInt(secondType)) 
+		if (isInt(type) || isTime(type)) return type;
+	if (isTime(type) && isTime(secondType)) return INT;
+	errorMismatch();
+	return INT;
+}
+
+void emitArith(YYSTYPE first, Arith op, YYSTYPE second){
+	switch (op){
+		case(PLUS): emitOp(first,"+", second); return;
+		case(MINUS): emitOp(first,"-", second); return;
+		case(MULT): emitMult(first, second); return;
+		case(DIV): emitPlus(first, second); return;
+	}
+}
+
+void emitOp(YYSTYPE first, string op, YYSTYPE second){
+	string res = newTempVar(first.type);
+	convert(second, first.type);
+	emit(s(res) + "=" + s(first.name) + op + s(second.name));
+}
+
+void emitMult(YYSTYPE first, YYSTYPE second){
+	if(isInt(first.type))
+
+}
+
+
+void convert(YYSTYPE var, Type type){
+	Type secondType = var.type;
+	if (secondType == type) return;
+
+	if (secondType<type) 
+		emit(s(var.name)+ "=" + s(var.name) + "*" + convertInt(type/secondType));
+
+	else 
+		emit(s(var.name)+ "=" + s(var.name) + "/" + convertInt(secondType/type));
+}
+
+
+
+string s(string i){
+	return "s[" + offset(i) + "]";
+}
+
+string offset(YYSTYPE var){
+	return convertInt(sym.getOffset(var.name));
+}
+
+void doIO(string name){
+	if (!sym.isDefined(name)) errorUndef(name);
+	Type type = sym.getType(name);
+	if(!isInt(type) && !isTime(type)) errorMismatch();
+}
+
+void addVariable(string name, Type type){
+	if (decScope==true) sym.startScope();
+	if (sym.addVariable(name, type) == false)
+	errorDef(name);
+	if (decScope==true) sym.endScope();
+}
+
+string addTempVar(Type type, string val){
+				 string name = newTemp();
+				 sym.addVariable(name, type); 
+				 emit("s[" + sym.getOffset(name)+"]="+val);
+				 return name;
+}
+
+string addTempVar(Type type){
+				 string name = newTemp();
+				 sym.addVariable(name, type); 
+				 return name;
+}
+
+Type getType(string name){
+	if (!sym.isDefined(name)) errorUndef(name);
+	return sym.getType(name);
+}
+
+
+string convertInt(int number){
+   stringstream ss;
+   ss << number;
+   return ss.str();
+}
+
+
+void errorMismatch(){
+	output::errorMismatch(yylineno);
+	exit(1);
+}
+
+void errorBreak(){
+	output::errorUnexpectedBreak(yylineno);
+	exit(1);
+}
+
+void errorUndef(string name){
+	output::errorUndef(yylineno, name.c_str());
+	exit(1);
+}
+
+void errorDef(string name){
+	output::errorDef(yylineno, name.c_str());
+	exit(1);
+}
+
+void errorLex(){
+	output::errorLex(yylineno);
+	exit(1);
+}
+
+void errorSyn(){
+	output::errorSyn(yylineno);
+	exit(1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
