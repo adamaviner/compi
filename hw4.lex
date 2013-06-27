@@ -1,7 +1,8 @@
 %{
 	#include "hw4.h"
 	#include "hw4.tab.hpp"
-	#include "stdio.h"
+	#include <stdio.h>
+	#include <string>
 %}
 
 %option yylineno
@@ -32,14 +33,14 @@ ops		([-(){}:;=+\*/<>])
 "bool"		return BOOLEAN;
 "switch"	return SWITCH;
 "case" 		return CASE;
-{ops}		return *yytext;
 "=="		return EQUALS;
 "!="		return NEQ;
 "<="		return LE;
 ">="		return GE;
-(\"[^"]*\") 		{ yylval.text = strdup(yytext); return STR; }
-[a-zA-Z]+			{ yylval.text = strdup(yytext); return IDEN; } 
-([1-9][0-9]*|0)		{ yylval.text = strdup(yytext); return NUM; }
+{ops}		return *yytext;
+(\"[^"]*\") 		{ yylval.text = string(yytext); return STR; }
+[a-zA-Z]+			{ yylval.text = string(yytext); return IDEN; } 
+([1-9][0-9]*|0)		{ yylval.text= string(yytext); return NUM; }
 [ \t\n\r]			; //whitespace	
 ("//"[^\n]*\n)		; //comment
 .				return ERROR;

@@ -1,5 +1,5 @@
 #ifndef __SCOPE_H
-#define __SCOPES_H
+#define __SCOPE_H
 
 #include <list>
 #include <string>
@@ -47,7 +47,7 @@ public:
 	void printScope(){
 		list<Variable>::const_iterator iterator;
 		for (iterator = variables.begin(); iterator != variables.end(); ++iterator) 
-    		output::printVar(iterator->getName().c_str(),iterator->getOffset(), typeToString(iterator->getType()));
+    		output::printVar(iterator->getName().c_str(),iterator->getOffset(), typeToString(iterator->getType()).c_str());
 	}
 };
 

@@ -387,10 +387,10 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[98] =
     {   0,
-        0,    0,   33,   31,   29,   29,   31,   31,   21,   21,
-       28,   28,   21,   21,   21,   27,   27,   27,   27,   27,
+        0,    0,   33,   31,   29,   29,   31,   31,   25,   25,
+       28,   28,   25,   25,   25,   27,   27,   27,   27,   27,
        27,   27,   27,   27,   27,   27,   27,   27,   27,   27,
-       27,   23,    0,   26,    0,   28,   24,   22,   25,   27,
+       27,   22,    0,   26,    0,   28,   23,   21,   24,   27,
        27,   27,   27,   27,   27,   27,   27,    5,   13,   27,
        27,   27,    2,   27,   27,   27,   27,   27,   27,    0,
        30,    1,   27,   27,   27,    6,   27,   27,   27,    8,
@@ -532,8 +532,9 @@ char *yytext;
 #line 2 "hw4.lex"
 	#include "hw4.h"
 	#include "hw4.tab.hpp"
-	#include "stdio.h"
-#line 537 "lex.yy.c"
+	#include <stdio.h>
+	#include <string>
+#line 538 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -715,11 +716,11 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 12 "hw4.lex"
+#line 13 "hw4.lex"
 
 
 
-#line 723 "lex.yy.c"
+#line 724 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -814,168 +815,168 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 15 "hw4.lex"
+#line 16 "hw4.lex"
 return AND;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 16 "hw4.lex"
+#line 17 "hw4.lex"
 return OR;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 17 "hw4.lex"
+#line 18 "hw4.lex"
 { return SEC; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 18 "hw4.lex"
+#line 19 "hw4.lex"
 { return MIN; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 19 "hw4.lex"
+#line 20 "hw4.lex"
 { return HR; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 20 "hw4.lex"
+#line 21 "hw4.lex"
 { return D; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 21 "hw4.lex"
+#line 22 "hw4.lex"
 { return W; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 22 "hw4.lex"
+#line 23 "hw4.lex"
 return INTEGER;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 23 "hw4.lex"
+#line 24 "hw4.lex"
 return PRINT;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 24 "hw4.lex"
+#line 25 "hw4.lex"
 return INPUT;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 25 "hw4.lex"
-{ yylval.number = 1; return BOOLEAN_VALUE; }
+#line 26 "hw4.lex"
+{ yylval.text = "1"; return BOOLEAN_VALUE; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 26 "hw4.lex"
-{ yylval.number = 0; return BOOLEAN_VALUE; }
+#line 27 "hw4.lex"
+{ yylval.text = "0"; return BOOLEAN_VALUE; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 27 "hw4.lex"
+#line 28 "hw4.lex"
 return IF;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 28 "hw4.lex"
+#line 29 "hw4.lex"
 return ELSE;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 29 "hw4.lex"
+#line 30 "hw4.lex"
 return WHILE;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 30 "hw4.lex"
+#line 31 "hw4.lex"
 return BREAK;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 31 "hw4.lex"
+#line 32 "hw4.lex"
 return NOT;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 32 "hw4.lex"
+#line 33 "hw4.lex"
 return BOOLEAN;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 33 "hw4.lex"
+#line 34 "hw4.lex"
 return SWITCH;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 34 "hw4.lex"
+#line 35 "hw4.lex"
 return CASE;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 35 "hw4.lex"
-return *yytext;
-	YY_BREAK
-case 22:
-YY_RULE_SETUP
 #line 36 "hw4.lex"
 return EQUALS;
 	YY_BREAK
-case 23:
+case 22:
 YY_RULE_SETUP
 #line 37 "hw4.lex"
 return NEQ;
 	YY_BREAK
-case 24:
+case 23:
 YY_RULE_SETUP
 #line 38 "hw4.lex"
 return LE;
 	YY_BREAK
-case 25:
+case 24:
 YY_RULE_SETUP
 #line 39 "hw4.lex"
 return GE;
 	YY_BREAK
+case 25:
+YY_RULE_SETUP
+#line 40 "hw4.lex"
+return *yytext;
+	YY_BREAK
 case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
-#line 40 "hw4.lex"
-{ yylval.text = strdup(yytext); return STR; }
+#line 41 "hw4.lex"
+{ yylval.text = string(yytext); return STR; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 41 "hw4.lex"
-{ yylval.text = strdup(yytext); return IDEN; } 
+#line 42 "hw4.lex"
+{ yylval.text = string(yytext); return IDEN; } 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 42 "hw4.lex"
-{ yylval.number = atoi(yytext); return NUM; }
+#line 43 "hw4.lex"
+{ yylval.text= string(yytext); return NUM; }
 	YY_BREAK
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 43 "hw4.lex"
+#line 44 "hw4.lex"
 ; //whitespace	
 	YY_BREAK
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 44 "hw4.lex"
+#line 45 "hw4.lex"
 ; //comment
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 45 "hw4.lex"
+#line 46 "hw4.lex"
 return ERROR;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 46 "hw4.lex"
+#line 47 "hw4.lex"
 ECHO;
 	YY_BREAK
-#line 979 "lex.yy.c"
+#line 980 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1984,6 +1985,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 46 "hw4.lex"
+#line 47 "hw4.lex"
 
 

@@ -1,0 +1,1625 @@
+State 95 conflicts: 1 reduce/reduce
+
+
+Grammar
+
+    0 $accept: P $end
+
+    1 @1: /* empty */
+
+    2 P: @1 Statments
+
+    3 Statments: Statments M Statment
+    4          | Statment
+
+    5 @2: /* empty */
+
+    6 Statment: '{' @2 Statments '}'
+    7         | Type IDEN ';'
+    8         | Type IDEN '=' Exp ';'
+    9         | IDEN '=' Exp ';'
+   10         | PRINT IDEN ';'
+   11         | PRINT STR ';'
+   12         | INPUT IDEN ';'
+   13         | IF '(' Exp ')' M DecStatment
+   14         | IF '(' Exp ')' M DecStatment N ELSE M DecStatment
+
+   15 @3: /* empty */
+
+   16 Statment: M WHILE '(' Exp ')' @3 M DecStatment N
+   17         | BREAK ';'
+   18         | SWITCH '(' Exp ')' '{' CasesList '}'
+   19         | ';'
+   20         | ERROR
+
+   21 @4: /* empty */
+
+   22 DecStatment: @4 Statment
+
+   23 CasesList: CaseStat CasesList
+   24          | CaseStat
+
+   25 CaseStat: M CASE NUM TimeUnit ':' M DecStatment BREAK ';'
+
+   26 TimeUnit: SEC
+   27         | MIN
+   28         | HR
+   29         | D
+   30         | W
+
+   31 Type: TimeUnit
+   32     | INTEGER
+   33     | BOOLEAN
+
+   34 Exp: '(' Exp ')'
+   35    | Exp '+' Exp
+   36    | Exp '-' Exp
+   37    | Exp '*' Exp
+   38    | Exp '/' Exp
+   39    | IDEN
+   40    | NUM
+   41    | NUM TimeUnit
+   42    | BOOLEAN_VALUE
+   43    | NOT Exp
+   44    | Exp OR M Exp
+   45    | Exp AND M Exp
+   46    | Exp '<' Exp
+   47    | Exp '>' Exp
+   48    | Exp LE Exp
+   49    | Exp GE Exp
+   50    | Exp EQUALS Exp
+   51    | Exp NEQ Exp
+
+   52 M: /* empty */
+
+   53 N: /* empty */
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 13 14 16 18 34
+')' (41) 13 14 16 18 34
+'*' (42) 37
+'+' (43) 35
+'-' (45) 36
+'/' (47) 38
+':' (58) 25
+';' (59) 7 8 9 10 11 12 17 19 25
+'<' (60) 46
+'=' (61) 8 9
+'>' (62) 47
+'{' (123) 6 18
+'}' (125) 6 18
+error (256)
+INPUT (258) 12
+BREAK (259) 17 25
+CASE (260) 25
+SWITCH (261) 18
+PRINT (262) 10 11
+IF (263) 13 14
+WHILE (264) 16
+ERROR (265) 20
+IDEN (266) 7 8 9 10 12 39
+STR (267) 11
+NUM (268) 25 40 41
+SEC (269) 26
+MIN (270) 27
+HR (271) 28
+D (272) 29
+W (273) 30
+BOOLEAN_VALUE (274) 42
+BOOLEAN (275) 33
+INTEGER (276) 32
+OR (277) 44
+AND (278) 45
+NEQ (279) 51
+EQUALS (280) 50
+LE (281) 48
+GE (282) 49
+NOT (283) 43
+ELSE (284) 14
+
+
+Nonterminals, with rules where they appear
+
+$accept (43)
+    on left: 0
+P (44)
+    on left: 2, on right: 0
+@1 (45)
+    on left: 1, on right: 2
+Statments (46)
+    on left: 3 4, on right: 2 3 6
+Statment (47)
+    on left: 6 7 8 9 10 11 12 13 14 16 17 18 19 20,
+    on right: 3 4 22
+@2 (48)
+    on left: 5, on right: 6
+@3 (49)
+    on left: 15, on right: 16
+DecStatment (50)
+    on left: 22, on right: 13 14 16 25
+@4 (51)
+    on left: 21, on right: 22
+CasesList (52)
+    on left: 23 24, on right: 18 23
+CaseStat (53)
+    on left: 25, on right: 23 24
+TimeUnit (54)
+    on left: 26 27 28 29 30, on right: 25 31 41
+Type (55)
+    on left: 31 32 33, on right: 7 8
+Exp (56)
+    on left: 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51
+   , on right: 8 9 13 14 16 18 34 35 36 37 38 43 44 45 46 47 48 49
+    50 51
+M (57)
+    on left: 52, on right: 3 13 14 16 25 44 45
+N (58)
+    on left: 53, on right: 14 16
+
+
+state 0
+
+    0 $accept: . P $end
+
+    $default  reduce using rule 1 (@1)
+
+    P   go to state 1
+    @1  go to state 2
+
+
+state 1
+
+    0 $accept: P . $end
+
+    $end  shift, and go to state 3
+
+
+state 2
+
+    2 P: @1 . Statments
+
+    ';'      shift, and go to state 4
+    INPUT    shift, and go to state 5
+    BREAK    shift, and go to state 6
+    SWITCH   shift, and go to state 7
+    PRINT    shift, and go to state 8
+    IF       shift, and go to state 9
+    ERROR    shift, and go to state 10
+    IDEN     shift, and go to state 11
+    SEC      shift, and go to state 12
+    MIN      shift, and go to state 13
+    HR       shift, and go to state 14
+    D        shift, and go to state 15
+    W        shift, and go to state 16
+    BOOLEAN  shift, and go to state 17
+    INTEGER  shift, and go to state 18
+    '{'      shift, and go to state 19
+
+    $default  reduce using rule 52 (M)
+
+    Statments  go to state 20
+    Statment   go to state 21
+    TimeUnit   go to state 22
+    Type       go to state 23
+    M          go to state 24
+
+
+state 3
+
+    0 $accept: P $end .
+
+    $default  accept
+
+
+state 4
+
+   19 Statment: ';' .
+
+    $default  reduce using rule 19 (Statment)
+
+
+state 5
+
+   12 Statment: INPUT . IDEN ';'
+
+    IDEN  shift, and go to state 25
+
+
+state 6
+
+   17 Statment: BREAK . ';'
+
+    ';'  shift, and go to state 26
+
+
+state 7
+
+   18 Statment: SWITCH . '(' Exp ')' '{' CasesList '}'
+
+    '('  shift, and go to state 27
+
+
+state 8
+
+   10 Statment: PRINT . IDEN ';'
+   11         | PRINT . STR ';'
+
+    IDEN  shift, and go to state 28
+    STR   shift, and go to state 29
+
+
+state 9
+
+   13 Statment: IF . '(' Exp ')' M DecStatment
+   14         | IF . '(' Exp ')' M DecStatment N ELSE M DecStatment
+
+    '('  shift, and go to state 30
+
+
+state 10
+
+   20 Statment: ERROR .
+
+    $default  reduce using rule 20 (Statment)
+
+
+state 11
+
+    9 Statment: IDEN . '=' Exp ';'
+
+    '='  shift, and go to state 31
+
+
+state 12
+
+   26 TimeUnit: SEC .
+
+    $default  reduce using rule 26 (TimeUnit)
+
+
+state 13
+
+   27 TimeUnit: MIN .
+
+    $default  reduce using rule 27 (TimeUnit)
+
+
+state 14
+
+   28 TimeUnit: HR .
+
+    $default  reduce using rule 28 (TimeUnit)
+
+
+state 15
+
+   29 TimeUnit: D .
+
+    $default  reduce using rule 29 (TimeUnit)
+
+
+state 16
+
+   30 TimeUnit: W .
+
+    $default  reduce using rule 30 (TimeUnit)
+
+
+state 17
+
+   33 Type: BOOLEAN .
+
+    $default  reduce using rule 33 (Type)
+
+
+state 18
+
+   32 Type: INTEGER .
+
+    $default  reduce using rule 32 (Type)
+
+
+state 19
+
+    6 Statment: '{' . @2 Statments '}'
+
+    $default  reduce using rule 5 (@2)
+
+    @2  go to state 32
+
+
+state 20
+
+    2 P: @1 Statments .
+    3 Statments: Statments . M Statment
+
+    $end      reduce using rule 2 (P)
+    $default  reduce using rule 52 (M)
+
+    M  go to state 33
+
+
+state 21
+
+    4 Statments: Statment .
+
+    $default  reduce using rule 4 (Statments)
+
+
+state 22
+
+   31 Type: TimeUnit .
+
+    $default  reduce using rule 31 (Type)
+
+
+state 23
+
+    7 Statment: Type . IDEN ';'
+    8         | Type . IDEN '=' Exp ';'
+
+    IDEN  shift, and go to state 34
+
+
+state 24
+
+   16 Statment: M . WHILE '(' Exp ')' @3 M DecStatment N
+
+    WHILE  shift, and go to state 35
+
+
+state 25
+
+   12 Statment: INPUT IDEN . ';'
+
+    ';'  shift, and go to state 36
+
+
+state 26
+
+   17 Statment: BREAK ';' .
+
+    $default  reduce using rule 17 (Statment)
+
+
+state 27
+
+   18 Statment: SWITCH '(' . Exp ')' '{' CasesList '}'
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 42
+
+
+state 28
+
+   10 Statment: PRINT IDEN . ';'
+
+    ';'  shift, and go to state 43
+
+
+state 29
+
+   11 Statment: PRINT STR . ';'
+
+    ';'  shift, and go to state 44
+
+
+state 30
+
+   13 Statment: IF '(' . Exp ')' M DecStatment
+   14         | IF '(' . Exp ')' M DecStatment N ELSE M DecStatment
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 45
+
+
+state 31
+
+    9 Statment: IDEN '=' . Exp ';'
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 46
+
+
+state 32
+
+    6 Statment: '{' @2 . Statments '}'
+
+    ';'      shift, and go to state 4
+    INPUT    shift, and go to state 5
+    BREAK    shift, and go to state 6
+    SWITCH   shift, and go to state 7
+    PRINT    shift, and go to state 8
+    IF       shift, and go to state 9
+    ERROR    shift, and go to state 10
+    IDEN     shift, and go to state 11
+    SEC      shift, and go to state 12
+    MIN      shift, and go to state 13
+    HR       shift, and go to state 14
+    D        shift, and go to state 15
+    W        shift, and go to state 16
+    BOOLEAN  shift, and go to state 17
+    INTEGER  shift, and go to state 18
+    '{'      shift, and go to state 19
+
+    $default  reduce using rule 52 (M)
+
+    Statments  go to state 47
+    Statment   go to state 21
+    TimeUnit   go to state 22
+    Type       go to state 23
+    M          go to state 24
+
+
+state 33
+
+    3 Statments: Statments M . Statment
+
+    ';'      shift, and go to state 4
+    INPUT    shift, and go to state 5
+    BREAK    shift, and go to state 6
+    SWITCH   shift, and go to state 7
+    PRINT    shift, and go to state 8
+    IF       shift, and go to state 9
+    ERROR    shift, and go to state 10
+    IDEN     shift, and go to state 11
+    SEC      shift, and go to state 12
+    MIN      shift, and go to state 13
+    HR       shift, and go to state 14
+    D        shift, and go to state 15
+    W        shift, and go to state 16
+    BOOLEAN  shift, and go to state 17
+    INTEGER  shift, and go to state 18
+    '{'      shift, and go to state 19
+
+    $default  reduce using rule 52 (M)
+
+    Statment  go to state 48
+    TimeUnit  go to state 22
+    Type      go to state 23
+    M         go to state 24
+
+
+state 34
+
+    7 Statment: Type IDEN . ';'
+    8         | Type IDEN . '=' Exp ';'
+
+    ';'  shift, and go to state 49
+    '='  shift, and go to state 50
+
+
+state 35
+
+   16 Statment: M WHILE . '(' Exp ')' @3 M DecStatment N
+
+    '('  shift, and go to state 51
+
+
+state 36
+
+   12 Statment: INPUT IDEN ';' .
+
+    $default  reduce using rule 12 (Statment)
+
+
+state 37
+
+   39 Exp: IDEN .
+
+    $default  reduce using rule 39 (Exp)
+
+
+state 38
+
+   40 Exp: NUM .
+   41    | NUM . TimeUnit
+
+    SEC  shift, and go to state 12
+    MIN  shift, and go to state 13
+    HR   shift, and go to state 14
+    D    shift, and go to state 15
+    W    shift, and go to state 16
+
+    $default  reduce using rule 40 (Exp)
+
+    TimeUnit  go to state 52
+
+
+state 39
+
+   42 Exp: BOOLEAN_VALUE .
+
+    $default  reduce using rule 42 (Exp)
+
+
+state 40
+
+   43 Exp: NOT . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 53
+
+
+state 41
+
+   34 Exp: '(' . Exp ')'
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 54
+
+
+state 42
+
+   18 Statment: SWITCH '(' Exp . ')' '{' CasesList '}'
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    OR      shift, and go to state 55
+    AND     shift, and go to state 56
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+    ')'     shift, and go to state 67
+
+
+state 43
+
+   10 Statment: PRINT IDEN ';' .
+
+    $default  reduce using rule 10 (Statment)
+
+
+state 44
+
+   11 Statment: PRINT STR ';' .
+
+    $default  reduce using rule 11 (Statment)
+
+
+state 45
+
+   13 Statment: IF '(' Exp . ')' M DecStatment
+   14         | IF '(' Exp . ')' M DecStatment N ELSE M DecStatment
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    OR      shift, and go to state 55
+    AND     shift, and go to state 56
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+    ')'     shift, and go to state 68
+
+
+state 46
+
+    9 Statment: IDEN '=' Exp . ';'
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    ';'     shift, and go to state 69
+    OR      shift, and go to state 55
+    AND     shift, and go to state 56
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+
+
+state 47
+
+    3 Statments: Statments . M Statment
+    6 Statment: '{' @2 Statments . '}'
+
+    '}'  shift, and go to state 70
+
+    $default  reduce using rule 52 (M)
+
+    M  go to state 33
+
+
+state 48
+
+    3 Statments: Statments M Statment .
+
+    $default  reduce using rule 3 (Statments)
+
+
+state 49
+
+    7 Statment: Type IDEN ';' .
+
+    $default  reduce using rule 7 (Statment)
+
+
+state 50
+
+    8 Statment: Type IDEN '=' . Exp ';'
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 71
+
+
+state 51
+
+   16 Statment: M WHILE '(' . Exp ')' @3 M DecStatment N
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 72
+
+
+state 52
+
+   41 Exp: NUM TimeUnit .
+
+    $default  reduce using rule 41 (Exp)
+
+
+state 53
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   43    | NOT Exp .
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    $default  reduce using rule 43 (Exp)
+
+
+state 54
+
+   34 Exp: '(' Exp . ')'
+   35    | Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    OR      shift, and go to state 55
+    AND     shift, and go to state 56
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+    ')'     shift, and go to state 73
+
+
+state 55
+
+   44 Exp: Exp OR . M Exp
+
+    $default  reduce using rule 52 (M)
+
+    M  go to state 74
+
+
+state 56
+
+   45 Exp: Exp AND . M Exp
+
+    $default  reduce using rule 52 (M)
+
+    M  go to state 75
+
+
+state 57
+
+   51 Exp: Exp NEQ . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 76
+
+
+state 58
+
+   50 Exp: Exp EQUALS . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 77
+
+
+state 59
+
+   46 Exp: Exp '<' . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 78
+
+
+state 60
+
+   47 Exp: Exp '>' . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 79
+
+
+state 61
+
+   48 Exp: Exp LE . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 80
+
+
+state 62
+
+   49 Exp: Exp GE . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 81
+
+
+state 63
+
+   35 Exp: Exp '+' . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 82
+
+
+state 64
+
+   36 Exp: Exp '-' . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 83
+
+
+state 65
+
+   37 Exp: Exp '*' . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 84
+
+
+state 66
+
+   38 Exp: Exp '/' . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 85
+
+
+state 67
+
+   18 Statment: SWITCH '(' Exp ')' . '{' CasesList '}'
+
+    '{'  shift, and go to state 86
+
+
+state 68
+
+   13 Statment: IF '(' Exp ')' . M DecStatment
+   14         | IF '(' Exp ')' . M DecStatment N ELSE M DecStatment
+
+    $default  reduce using rule 52 (M)
+
+    M  go to state 87
+
+
+state 69
+
+    9 Statment: IDEN '=' Exp ';' .
+
+    $default  reduce using rule 9 (Statment)
+
+
+state 70
+
+    6 Statment: '{' @2 Statments '}' .
+
+    $default  reduce using rule 6 (Statment)
+
+
+state 71
+
+    8 Statment: Type IDEN '=' Exp . ';'
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    ';'     shift, and go to state 88
+    OR      shift, and go to state 55
+    AND     shift, and go to state 56
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+
+
+state 72
+
+   16 Statment: M WHILE '(' Exp . ')' @3 M DecStatment N
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    OR      shift, and go to state 55
+    AND     shift, and go to state 56
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+    ')'     shift, and go to state 89
+
+
+state 73
+
+   34 Exp: '(' Exp ')' .
+
+    $default  reduce using rule 34 (Exp)
+
+
+state 74
+
+   44 Exp: Exp OR M . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 90
+
+
+state 75
+
+   45 Exp: Exp AND M . Exp
+
+    IDEN           shift, and go to state 37
+    NUM            shift, and go to state 38
+    BOOLEAN_VALUE  shift, and go to state 39
+    NOT            shift, and go to state 40
+    '('            shift, and go to state 41
+
+    Exp  go to state 91
+
+
+state 76
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+   51    | Exp NEQ Exp .
+
+    '<'  shift, and go to state 59
+    '>'  shift, and go to state 60
+    LE   shift, and go to state 61
+    GE   shift, and go to state 62
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 51 (Exp)
+
+
+state 77
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   50    | Exp EQUALS Exp .
+   51    | Exp . NEQ Exp
+
+    '<'  shift, and go to state 59
+    '>'  shift, and go to state 60
+    LE   shift, and go to state 61
+    GE   shift, and go to state 62
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 50 (Exp)
+
+
+state 78
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   46    | Exp '<' Exp .
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 46 (Exp)
+
+
+state 79
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   47    | Exp '>' Exp .
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 47 (Exp)
+
+
+state 80
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   48    | Exp LE Exp .
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 48 (Exp)
+
+
+state 81
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   49    | Exp GE Exp .
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    '+'  shift, and go to state 63
+    '-'  shift, and go to state 64
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 49 (Exp)
+
+
+state 82
+
+   35 Exp: Exp . '+' Exp
+   35    | Exp '+' Exp .
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 35 (Exp)
+
+
+state 83
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   36    | Exp '-' Exp .
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    '*'  shift, and go to state 65
+    '/'  shift, and go to state 66
+
+    $default  reduce using rule 36 (Exp)
+
+
+state 84
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   37    | Exp '*' Exp .
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    $default  reduce using rule 37 (Exp)
+
+
+state 85
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   38    | Exp '/' Exp .
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    $default  reduce using rule 38 (Exp)
+
+
+state 86
+
+   18 Statment: SWITCH '(' Exp ')' '{' . CasesList '}'
+
+    $default  reduce using rule 52 (M)
+
+    CasesList  go to state 92
+    CaseStat   go to state 93
+    M          go to state 94
+
+
+state 87
+
+   13 Statment: IF '(' Exp ')' M . DecStatment
+   14         | IF '(' Exp ')' M . DecStatment N ELSE M DecStatment
+
+    $default  reduce using rule 21 (@4)
+
+    DecStatment  go to state 95
+    @4           go to state 96
+
+
+state 88
+
+    8 Statment: Type IDEN '=' Exp ';' .
+
+    $default  reduce using rule 8 (Statment)
+
+
+state 89
+
+   16 Statment: M WHILE '(' Exp ')' . @3 M DecStatment N
+
+    $default  reduce using rule 15 (@3)
+
+    @3  go to state 97
+
+
+state 90
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   44    | Exp OR M Exp .
+   45    | Exp . AND M Exp
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    AND     shift, and go to state 56
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+
+    $default  reduce using rule 44 (Exp)
+
+
+state 91
+
+   35 Exp: Exp . '+' Exp
+   36    | Exp . '-' Exp
+   37    | Exp . '*' Exp
+   38    | Exp . '/' Exp
+   44    | Exp . OR M Exp
+   45    | Exp . AND M Exp
+   45    | Exp AND M Exp .
+   46    | Exp . '<' Exp
+   47    | Exp . '>' Exp
+   48    | Exp . LE Exp
+   49    | Exp . GE Exp
+   50    | Exp . EQUALS Exp
+   51    | Exp . NEQ Exp
+
+    NEQ     shift, and go to state 57
+    EQUALS  shift, and go to state 58
+    '<'     shift, and go to state 59
+    '>'     shift, and go to state 60
+    LE      shift, and go to state 61
+    GE      shift, and go to state 62
+    '+'     shift, and go to state 63
+    '-'     shift, and go to state 64
+    '*'     shift, and go to state 65
+    '/'     shift, and go to state 66
+
+    $default  reduce using rule 45 (Exp)
+
+
+state 92
+
+   18 Statment: SWITCH '(' Exp ')' '{' CasesList . '}'
+
+    '}'  shift, and go to state 98
+
+
+state 93
+
+   23 CasesList: CaseStat . CasesList
+   24          | CaseStat .
+
+    CASE      reduce using rule 52 (M)
+    $default  reduce using rule 24 (CasesList)
+
+    CasesList  go to state 99
+    CaseStat   go to state 93
+    M          go to state 94
+
+
+state 94
+
+   25 CaseStat: M . CASE NUM TimeUnit ':' M DecStatment BREAK ';'
+
+    CASE  shift, and go to state 100
+
+
+state 95
+
+   13 Statment: IF '(' Exp ')' M DecStatment .
+   14         | IF '(' Exp ')' M DecStatment . N ELSE M DecStatment
+
+    ELSE      reduce using rule 13 (Statment)
+    ELSE      [reduce using rule 53 (N)]
+    $default  reduce using rule 13 (Statment)
+
+    N  go to state 101
+
+
+state 96
+
+   22 DecStatment: @4 . Statment
+
+    ';'      shift, and go to state 4
+    INPUT    shift, and go to state 5
+    BREAK    shift, and go to state 6
+    SWITCH   shift, and go to state 7
+    PRINT    shift, and go to state 8
+    IF       shift, and go to state 9
+    ERROR    shift, and go to state 10
+    IDEN     shift, and go to state 11
+    SEC      shift, and go to state 12
+    MIN      shift, and go to state 13
+    HR       shift, and go to state 14
+    D        shift, and go to state 15
+    W        shift, and go to state 16
+    BOOLEAN  shift, and go to state 17
+    INTEGER  shift, and go to state 18
+    '{'      shift, and go to state 19
+
+    $default  reduce using rule 52 (M)
+
+    Statment  go to state 102
+    TimeUnit  go to state 22
+    Type      go to state 23
+    M         go to state 24
+
+
+state 97
+
+   16 Statment: M WHILE '(' Exp ')' @3 . M DecStatment N
+
+    $default  reduce using rule 52 (M)
+
+    M  go to state 103
+
+
+state 98
+
+   18 Statment: SWITCH '(' Exp ')' '{' CasesList '}' .
+
+    $default  reduce using rule 18 (Statment)
+
+
+state 99
+
+   23 CasesList: CaseStat CasesList .
+
+    $default  reduce using rule 23 (CasesList)
+
+
+state 100
+
+   25 CaseStat: M CASE . NUM TimeUnit ':' M DecStatment BREAK ';'
+
+    NUM  shift, and go to state 104
+
+
+state 101
+
+   14 Statment: IF '(' Exp ')' M DecStatment N . ELSE M DecStatment
+
+    ELSE  shift, and go to state 105
+
+
+state 102
+
+   22 DecStatment: @4 Statment .
+
+    $default  reduce using rule 22 (DecStatment)
+
+
+state 103
+
+   16 Statment: M WHILE '(' Exp ')' @3 M . DecStatment N
+
+    $default  reduce using rule 21 (@4)
+
+    DecStatment  go to state 106
+    @4           go to state 96
+
+
+state 104
+
+   25 CaseStat: M CASE NUM . TimeUnit ':' M DecStatment BREAK ';'
+
+    SEC  shift, and go to state 12
+    MIN  shift, and go to state 13
+    HR   shift, and go to state 14
+    D    shift, and go to state 15
+    W    shift, and go to state 16
+
+    TimeUnit  go to state 107
+
+
+state 105
+
+   14 Statment: IF '(' Exp ')' M DecStatment N ELSE . M DecStatment
+
+    $default  reduce using rule 52 (M)
+
+    M  go to state 108
+
+
+state 106
+
+   16 Statment: M WHILE '(' Exp ')' @3 M DecStatment . N
+
+    $default  reduce using rule 53 (N)
+
+    N  go to state 109
+
+
+state 107
+
+   25 CaseStat: M CASE NUM TimeUnit . ':' M DecStatment BREAK ';'
+
+    ':'  shift, and go to state 110
+
+
+state 108
+
+   14 Statment: IF '(' Exp ')' M DecStatment N ELSE M . DecStatment
+
+    $default  reduce using rule 21 (@4)
+
+    DecStatment  go to state 111
+    @4           go to state 96
+
+
+state 109
+
+   16 Statment: M WHILE '(' Exp ')' @3 M DecStatment N .
+
+    $default  reduce using rule 16 (Statment)
+
+
+state 110
+
+   25 CaseStat: M CASE NUM TimeUnit ':' . M DecStatment BREAK ';'
+
+    $default  reduce using rule 52 (M)
+
+    M  go to state 112
+
+
+state 111
+
+   14 Statment: IF '(' Exp ')' M DecStatment N ELSE M DecStatment .
+
+    $default  reduce using rule 14 (Statment)
+
+
+state 112
+
+   25 CaseStat: M CASE NUM TimeUnit ':' M . DecStatment BREAK ';'
+
+    $default  reduce using rule 21 (@4)
+
+    DecStatment  go to state 113
+    @4           go to state 96
+
+
+state 113
+
+   25 CaseStat: M CASE NUM TimeUnit ':' M DecStatment . BREAK ';'
+
+    BREAK  shift, and go to state 114
+
+
+state 114
+
+   25 CaseStat: M CASE NUM TimeUnit ':' M DecStatment BREAK . ';'
+
+    ';'  shift, and go to state 115
+
+
+state 115
+
+   25 CaseStat: M CASE NUM TimeUnit ':' M DecStatment BREAK ';' .
+
+    $default  reduce using rule 25 (CaseStat)

@@ -1,8 +1,10 @@
 %{
 	#include "hw4.h"
+	#include "bp.hpp"
 	#include <iostream>
 	#include <stdlib.h>
 	#include <string>
+	#include <sstream>
 	#include "symbolTable.h"
 	#include "output.hpp"
 
@@ -21,6 +23,7 @@
 
 	int whiles = 0;
 	bool decScope = false;
+	list<CaseCond> condList;
 
 	void typeMis(int line);
 	bool isInt(Type t);
@@ -43,12 +46,25 @@
 	Type calculateDiv(Type type, Type secondType);
 	void doIO(string name);
 	void addVariable(string name, Type type);
+	string addTempVar(Type type);
 	string addTempVar(Type type, string val);
 	Type getType(string name);
 	string convertInt(int number);
 
-	void emitArith(YYSTYPE first, Arith op, YYSTYPE second);
-	void emitOp(YYSTYPE first, string op, YYSTYPE second);
+	void convert(Type from, string name, Type to);
+	void convert(YYSTYPE var, Type type);
+	string s(string i);
+	string offset(string var_c);
+
+	string emitArith(YYSTYPE first, Arith op, YYSTYPE second);
+	string emitOp(YYSTYPE first, string op, YYSTYPE second);
+	string emitMult(YYSTYPE first, YYSTYPE second);
+	string emitDiv(YYSTYPE first, YYSTYPE second);
+
+	YYSTYPE initListBool(YYSTYPE E,string boolVal);
+	YYSTYPE reverseLists(YYSTYPE p);
+	YYSTYPE emitRop(string left_c, string op_c, string right_c);
+	YYSTYPE emitCompRop (string first_c, char rop, string second_c);
 %}
 
 %token ';' INPUT BREAK CASE SWITCH PRINT IF WHILE ERROR
@@ -68,36 +84,68 @@
 
 %%
 
-P			: {sym.startScope();} Statments {sym.endScope();}
+P			: {sym.startScope();} Statments {bp($2.nextList, next());printBuffer(); sym.endScope();}
 			;
 
-Statments	: Statments Statment
-			| Statment
+Statments	: Statments M Statment {bp($1.nextList,$2.quad); $$=$3; $$.breakList=merge($1.breakList,$3.breakList);}
+			| Statment {$$=$1; }
 			;
 
-Statment 	: '{' {sym.startScope();decScope=false;} Statments '}' {sym.endScope();}
-			| Type IDEN ';'               {addVariable($2.text, $1.type);}
-			| Type IDEN '=' Exp ';'       {assertAssignable($1.type,$4.type); addVariable($2.text, $1.type);}
-			| IDEN '=' Exp ';'       {assertAssignable(getType($1.text),$3.type);}
-			| PRINT IDEN ';' 				{doIO($2.text);}
-			| PRINT STR ';' 			
-			| INPUT IDEN ';'				{doIO($2.text);}
-			| IF '(' Exp ')' DecStatment	{assertType($3.type, BOOL);}
-			| IF '(' Exp ')' DecStatment ELSE DecStatment {assertType($3.type, BOOL);}
-			| WHILE '(' Exp ')' {++whiles;} DecStatment {assertType($3.type, BOOL); --whiles;}
-			| BREAK ';' 		{if (whiles == 0) errorBreak(); }
-			| SWITCH '(' Exp ')' '{' CasesList '}' {assertTime($3.type);}
-			| ';' 					{errorSyn();}
+Statment 	: '{' {sym.startScope();decScope=false;} Statments '}' {sym.endScope(); $$=$2;}
+			| Type IDEN ';'               {addVariable($2.text, $1.type); }
+			| Type IDEN '=' Exp ';'       {assertAssignable($1.type,$4.type); addVariable($2.text, $1.type); 
+				convert($4, $1.type);  emit(s($2.text) + '=' + s($4.text));}
+			| IDEN '=' Exp ';'       {assertAssignable(getType($1.text),$3.type); convert($3, $1.type); 
+				emit(s($1.text) + '=' + s($3.text));}
+			| PRINT IDEN ';' 				{doIO($2.text); emit("print " + s($2.text));}
+			| PRINT STR ';' 			    {emit("print " + $2.text);}
+			| INPUT IDEN ';'				{doIO($2.text); emit("input " + s($2.text));}
+			| IF '(' Exp ')' M DecStatment	{assertType($3.type, BOOL); 
+				bp($3.trueList, $5.quad);
+				 $$.nextList=merge($3.falseList,$6.nextList);
+				 $$.breakList=$6.breakList;
+				}
+			| IF '(' Exp ')' M DecStatment ELSE N M DecStatment 
+			{
+				assertType($3.type, BOOL);
+				bp($3.trueList,$5.quad); 
+				bp($3.falseList,$9.quad); 
+				$$.nextList=merge(merge($8.nextList,$6.nextList),$10.nextList);
+				$$.breakList=merge($6.breakList,$10.breakList);
+			}
+			| M WHILE '(' Exp ')' {++whiles;  } M DecStatment N {
+				assertType($4.type, BOOL); --whiles; 
+				$$.nextList=merge(merge($4.falseList,$7.breakList), $8.nextList);
+				bp($7.nextList,$1.quad);
+				bp($4.trueList,$6.quad);
+			}
+			| BREAK ';' 		{if (whiles == 0) errorBreak(); $$.breakList=makelist(next()); emit("goto "); }
+			| SWITCH '(' Exp ')' '{' CasesList '}' { //goto before and after
+				assertTime($3.type); 
+				while (!condList.empty()){
+					CaseCond c= condList.front();
+					condList.pop_front();
+					string tempVar = addTempVar(c.type, c.val);
+					convert(c.type, tempVar.c_str(), $3.type);
+					emit("if " + s(tempVar.c_str()) + "==" + s($3.text) + " goto " + convertInt(c.quad));
+				}
+
+				// $$.nextList=merge($6.nextList, makelist(next()));
+				// emit("goto ");
+				}
+			| ';' 			{errorSyn();}
 			| ERROR 		{errorLex(); }
 			;
 
-DecStatment	: { decScope=true;} Statment { decScope=false;}
+DecStatment	: { decScope=true;} Statment { decScope=false; $$=$1;}
 
-CasesList	: CaseStat CasesList
-			| CaseStat
+CasesList	: CaseStat  CasesList {$$.nextList= merge($1.nextList,$2.nextList);}
+			| CaseStat {$$=$1;}
 			;
 
-CaseStat	: CASE NUM TimeUnit ':' DecStatment BREAK ';'
+CaseStat	: M CASE NUM TimeUnit ':' M DecStatment BREAK ';' {
+				condList.push_back(CaseCond($3.text,$4.type, $6.quad)); $$.nextList = $7.nextList;
+			}
 			;
 
 TimeUnit	: SEC 		{$$.type = SECOND;}
@@ -112,27 +160,35 @@ Type 		: TimeUnit 		{$$.type = $1.type;}
 			| BOOLEAN 			{$$.type = BOOL;}
 			;
 
+
 Exp			: '(' Exp ')' 	{$$ = $2}
-			| Exp '+' Exp 	{assertComparable($1.type, $3.type); $$.type = $1.type; emitArith($1,PLUS,$3);}
-			| Exp '-' Exp 	{assertComparable($1.type, $3.type); $$.type = $1.type; emitArith($1,MINUS,$3);}
-			| Exp '*' Exp 	{$$.type = calculateMultiply($1.type, $3.type); emitArith($1,MULT,$3);}
-			| Exp '/' Exp   {$$.type = calculateDiv($1.type, $3.type); emitArith($1,DIV,$3);}
-			| IDEN 			 {$$.type = getType($1.text);}
-			| NUM			 {$$.type = INT; $$.name = addTempVar(INT, $1.text);}
-			| NUM TimeUnit	 {$$.type = $2.type; $$.name = addTempVar($2.type, $1.text);}
-			| BOOLEAN_VALUE  {$$.type = BOOL; $$.name = addTempVar(BOOL, $1.text);}
-			| NOT Exp 		 {assertType($2.type, BOOL); $$ = $2;}
-			| Exp OR Exp     {assertType($1.type, $3.type, BOOL); $$.type = BOOL;}
-			| Exp AND Exp    {assertType($1.type, $3.type, BOOL); $$.type = BOOL;}
-			| Exp '<' Exp 	 {assertComparable($1.type, $3.type); $$.type = BOOL;}
-			| Exp '>' Exp    {assertComparable($1.type, $3.type); $$.type = BOOL;}
-			| Exp LE Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
-			| Exp GE Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
-			| Exp EQUALS Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
-			| Exp NEQ Exp   {assertComparable($1.type, $3.type); $$.type = BOOL;}
+			| Exp '+' Exp 	{assertComparable($1.type, $3.type); $$.text = emitArith($1,PLUS,$3); $$.type=getType($$.text);}
+			| Exp '-' Exp 	{assertComparable($1.type, $3.type); $$.text = emitArith($1,MINUS,$3); $$.type=getType($$.text);}
+			| Exp '*' Exp 	{$$.text = emitArith($1,MULT,$3); $$.type=getType($$.text);}
+			| Exp '/' Exp   {$$.text = emitArith($1,DIV,$3); $$.type=getType($$.text);}
+			| IDEN 			 {$$.type = getType($1.text); $$.text=$1.text;}
+			| NUM			 {$$.type = INT; $$.text = addTempVar(INT, $1.text);}
+			| NUM TimeUnit	 {$$.type = $2.type; $$.text = addTempVar($2.type, $1.text);}
+			| BOOLEAN_VALUE  {$$.type = BOOL; $$.text = addTempVar(BOOL, $1.text); $$=initListBool($$,$1.text); }
+			| NOT Exp 		 {assertType($2.type, BOOL); $$ = $2; $$=reverseLists($$);}
+			| Exp OR M Exp     {assertType($1.type, $3.type, BOOL); $$.type = BOOL; 
+				bp($1.falseList, $3.quad);$$.trueList=merge($1.trueList,$4.trueList);$$.falseList=$4.falseList;}
+			| Exp AND M Exp    {assertType($1.type, $3.type, BOOL); $$.type = BOOL;
+				 $$.falseList=merge($1.falseList,$4.falseList); $$.trueList=$4.trueList; bp($1.trueList,$3.quad);}
+			| Exp '<' Exp 	 {assertComparable($1.type, $3.type); $$.type = BOOL; $$=emitRop($1.text, "<", $3.text);}
+			| Exp '>' Exp    {assertComparable($1.type, $3.type); $$.type = BOOL; $$=emitRop($1.text, ">", $3.text);}
+			| Exp LE Exp   {assertComparable($1.type, $3.type); $$.type = BOOL; $$=emitCompRop($1.text, '<' , $3.text); }
+			| Exp GE Exp   {assertComparable($1.type, $3.type); $$.type = BOOL; $$=emitCompRop($1.text, '>' , $3.text);}
+			| Exp EQUALS Exp   {assertComparable($1.type, $3.type); $$.type = BOOL; $$=emitRop($1.text, "==", $3.text);}
+			| Exp NEQ Exp   {assertComparable($1.type, $3.type); $$.type = BOOL; $$=emitRop($1.text, "!=", $3.text);}
 			;
 
 
+M 			: {$$.quad = next();}
+			;
+
+N 			: {$$.quad = next(); emit("goto "); $$.nextList=makelist($$.quad);}
+			;
 
 %%
 
@@ -225,36 +281,49 @@ Type calculateDiv(Type type, Type secondType){
 	return INT;
 }
 
-void emitArith(YYSTYPE first, Arith op, YYSTYPE second){
+string emitArith(YYSTYPE first, Arith op, YYSTYPE second){
 	switch (op){
-		case(PLUS): emitOp(first,"+", second); return;
-		case(MINUS): emitOp(first,"-", second); return;
-		case(MULT): emitMult(first, second); return;
-		case(DIV): emitPlus(first, second); return;
+		case(PLUS): return emitOp(first,"+", second); 
+		case(MINUS): return emitOp(first,"-", second); 
+		case(MULT): return emitMult(first, second); 
+		case(DIV): return emitDiv(first, second); 
 	}
 }
 
-void emitOp(YYSTYPE first, string op, YYSTYPE second){
-	string res = newTempVar(first.type);
+string emitOp(YYSTYPE first, string op, YYSTYPE second){
+	string res = addTempVar(first.type);
 	convert(second, first.type);
-	emit(s(res) + "=" + s(first.name) + op + s(second.name));
+	emit(s(res) + "=" + s(first.text) + op + s(second.text));
+	return res;
 }
 
-void emitMult(YYSTYPE first, YYSTYPE second){
-	if(isInt(first.type))
-
+string emitMult(YYSTYPE first, YYSTYPE second){
+	string res = addTempVar(calculateMultiply(first.type,second.type));
+	emit(s(res) + '=' + s(first.text) + '*' + s(second.text));
+	return res;
 }
 
+string emitDiv(YYSTYPE first, YYSTYPE second) {
+	string res = addTempVar(calculateDiv(first.type, second.type));
+	if (isTime(first.type) && isTime(second.type)) convert (second, first.type);
+	emit(s(res) + '=' + s(first.text) + '/' + s(second.text));
+	return res;
 
-void convert(YYSTYPE var, Type type){
-	Type secondType = var.type;
-	if (secondType == type) return;
+	
+}
 
-	if (secondType<type) 
-		emit(s(var.name)+ "=" + s(var.name) + "*" + convertInt(type/secondType));
+void convert(Type from, string name, Type to){
+	if(from==to) return;
+	if (from>to) 
+		emit(s(name)+ "=" + s(name) + "*" + convertInt(from/to));
 
 	else 
-		emit(s(var.name)+ "=" + s(var.name) + "/" + convertInt(secondType/type));
+		emit(s(name)+ "=" + s(name) + "/" + convertInt(to/from));
+
+}
+
+void convert(YYSTYPE var, Type type){
+	convert(var.type, var.text, type);
 }
 
 
@@ -263,8 +332,8 @@ string s(string i){
 	return "s[" + offset(i) + "]";
 }
 
-string offset(YYSTYPE var){
-	return convertInt(sym.getOffset(var.name));
+string offset(string var){
+	return convertInt(sym.getOffset(var));
 }
 
 void doIO(string name){
@@ -283,7 +352,7 @@ void addVariable(string name, Type type){
 string addTempVar(Type type, string val){
 				 string name = newTemp();
 				 sym.addVariable(name, type); 
-				 emit("s[" + sym.getOffset(name)+"]="+val);
+				 emit(s(name)+"="+val);
 				 return name;
 }
 
@@ -338,26 +407,40 @@ void errorSyn(){
 
 
 
+YYSTYPE initListBool(YYSTYPE E,string boolVal){
+	if (boolVal.compare("1") == 0) E.trueList=makelist(next());
+	else E.falseList=makelist(next());
+	emit("goto ");
+	return E;
+}
+
+YYSTYPE reverseLists(YYSTYPE p){
+	list<int> tempList = p.trueList;
+	p.trueList=p.falseList;
+	p.falseList=tempList;
+	return p;
+}
+
+YYSTYPE emitRop(string left, string op, string right){
+	YYSTYPE retVal;
+	retVal.type = BOOL;
+	retVal.trueList = makelist(next());
+	emit("if " + s(left) + " " + op + " " + s(right) + " goto ");
+	retVal.falseList = makelist(next());
+	emit("goto ");
+	return retVal;
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+YYSTYPE emitCompRop (string left, char rop, string right){
+	YYSTYPE retVal;
+	retVal.type = BOOL;
+	retVal.trueList=makelist(next());
+	emit("if " + s(left) + " "+ rop + " " + s(right) + " goto ");
+	list<int> tempList = makelist(next());
+	emit("if " + s(left) + " "+ "==" + " " + s(right) + " goto ");
+	retVal.trueList=merge(retVal.trueList,tempList);
+	retVal.falseList=makelist(next());
+	emit("goto ");
+	return retVal;
+}

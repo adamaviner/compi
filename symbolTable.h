@@ -28,8 +28,8 @@ public:
 	}
 
 	bool endScope(){
-		output::endScope();
-		scopes.back().printScope();
+		//output::endScope();
+		//scopes.back().printScope();
 		scopes.pop_back();
 	}
 
@@ -53,9 +53,9 @@ public:
 	}
 
 	int getOffset(string name){
-		Variable* var = getVariable(name);
+		const Variable* var = getVariable(name);
 		if (var == NULL) return -1;
-		return var.getOffset();
+		return var->getOffset();
 	}
 		
 
