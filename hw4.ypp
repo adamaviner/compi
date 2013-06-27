@@ -91,7 +91,7 @@ Statments	: Statments M Statment {bp($1.nextList,$2.quad); $$=$3; $$.breakList=m
 			| Statment {$$=$1; }
 			;
 
-Statment 	: '{' {sym.startScope();decScope=false;} Statments '}' {sym.endScope(); $$=$2;}
+Statment 	: '{' {sym.startScope();decScope=false;} Statments '}' {sym.endScope(); $$=$3;}
 			| Type IDEN ';'               {addVariable($2.text, $1.type); }
 			| Type IDEN '=' Exp ';'       {assertAssignable($1.type,$4.type); addVariable($2.text, $1.type); 
 				convert($4, $1.type);  emit(s($2.text) + '=' + s($4.text));}
@@ -115,13 +115,15 @@ Statment 	: '{' {sym.startScope();decScope=false;} Statments '}' {sym.endScope()
 			}
 			| M WHILE '(' Exp ')' {++whiles;  } M DecStatment N {
 				assertType($4.type, BOOL); --whiles; 
-				$$.nextList=merge(merge($4.falseList,$7.breakList), $8.nextList);
-				bp($7.nextList,$1.quad);
-				bp($4.trueList,$6.quad);
+				$$.nextList=merge(merge($4.falseList,$8.breakList), $9.nextList);
+				bp($8.nextList,$1.quad);
+				bp($4.trueList,$7.quad);
 			}
 			| BREAK ';' 		{if (whiles == 0) errorBreak(); $$.breakList=makelist(next()); emit("goto "); }
-			| SWITCH '(' Exp ')' '{' CasesList '}' { //goto before and after
+			| SWITCH '(' Exp ')' '{' N CasesList '}' { //goto before and after
 				assertTime($3.type); 
+				$3.nextList = merge($6.nextList, $3.nextList);
+				bp($3.nextList, next());
 				while (!condList.empty()){
 					CaseCond c= condList.front();
 					condList.pop_front();
@@ -130,21 +132,21 @@ Statment 	: '{' {sym.startScope();decScope=false;} Statments '}' {sym.endScope()
 					emit("if " + s(tempVar.c_str()) + "==" + s($3.text) + " goto " + convertInt(c.quad));
 				}
 
-				// $$.nextList=merge($6.nextList, makelist(next()));
-				// emit("goto ");
+				$$.nextList=merge($7.nextList, makelist(next()));
+				emit("goto ");
 				}
 			| ';' 			{errorSyn();}
 			| ERROR 		{errorLex(); }
 			;
 
-DecStatment	: { decScope=true;} Statment { decScope=false; $$=$1;}
+DecStatment	: { decScope=true;} Statment { decScope=false; $$=$2;}
 
 CasesList	: CaseStat  CasesList {$$.nextList= merge($1.nextList,$2.nextList);}
 			| CaseStat {$$=$1;}
 			;
 
-CaseStat	: M CASE NUM TimeUnit ':' M DecStatment BREAK ';' {
-				condList.push_back(CaseCond($3.text,$4.type, $6.quad)); $$.nextList = $7.nextList;
+CaseStat	: M CASE NUM TimeUnit ':' M DecStatment N BREAK ';' {
+				condList.push_back(CaseCond($3.text,$4.type, $6.quad)); $$.nextList = merge($7.nextList, $8.nextList);
 			}
 			;
 

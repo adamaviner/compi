@@ -1,6 +1,5 @@
-switch(60 sec){
-	case 1 min: print "min"; break;
-	case 1 sec: print "sec"; break;
-}
 
 
+print "---------if else-------";
+
+bool b = 3+2*2 < 9;

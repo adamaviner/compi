@@ -1,8 +1,10 @@
-s[0]=60
-print "min"
-print "sec"
-s[1]=1
-s[1]=s[1]*60
-if s[1]==s[0] goto 1
-s[2]=1
-if s[2]==s[0] goto 2
+print "---------if else-------"
+s[0]=3
+s[1]=2
+s[2]=2
+s[3]=s[1]*s[2]
+s[4]=s[0]+s[3]
+s[5]=9
+if s[4] < s[5] goto 
+goto 
+s[6]=s[-1]
